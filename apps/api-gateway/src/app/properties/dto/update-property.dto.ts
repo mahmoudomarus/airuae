@@ -1,59 +1,84 @@
-import { IsArray, IsBoolean, IsNumber, IsOptional, IsString, Min } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsNumber,
+  IsArray,
+  IsBoolean,
+  Min,
+  MaxLength,
+} from 'class-validator';
 
 export class UpdatePropertyDto {
-  @IsString()
   @IsOptional()
+  @IsString()
+  @MaxLength(100)
   title?: string;
 
-  @IsString()
   @IsOptional()
+  @IsString()
+  @MaxLength(2000)
   description?: string;
 
-  @IsString()
   @IsOptional()
+  @IsString()
+  @MaxLength(200)
   address?: string;
 
-  @IsString()
   @IsOptional()
+  @IsString()
+  @MaxLength(100)
   city?: string;
 
-  @IsString()
   @IsOptional()
+  @IsString()
+  @MaxLength(100)
   country?: string;
 
-  @IsString()
   @IsOptional()
+  @IsString()
+  @MaxLength(20)
   zipCode?: string;
 
+  @IsOptional()
   @IsNumber()
   @Min(0)
-  @IsOptional()
   price?: number;
 
+  @IsOptional()
   @IsNumber()
   @Min(0)
-  @IsOptional()
   bedrooms?: number;
 
+  @IsOptional()
   @IsNumber()
   @Min(0)
-  @IsOptional()
   bathrooms?: number;
 
-  @IsNumber()
   @IsOptional()
+  @IsNumber()
   @Min(0)
   size?: number;
 
-  @IsArray()
   @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
   images?: string[];
 
-  @IsArray()
   @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
   amenities?: string[];
 
-  @IsBoolean()
   @IsOptional()
+  @IsBoolean()
   available?: boolean;
+
+  // Geo-location fields
+  @IsOptional()
+  @IsNumber()
+  latitude?: number;
+
+  @IsOptional()
+  @IsNumber()
+  longitude?: number;
 }

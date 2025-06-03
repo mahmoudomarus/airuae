@@ -7,28 +7,37 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// User model with authentication fields
 model User {
-  id            String    @id @default(uuid())
-  email         String    @unique
-  passwordHash  String?
-  firstName     String?
-  lastName      String?
-  profileImage  String?
-  phone         String?
-  isVerified    Boolean   @default(false)
-  role          UserRole  @default(USER)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id           String     @id
+  email        String     @unique
+  password     String?    @map("passwordHash")
+  firstName    String?
+  lastName     String?
+  profileImage String?
+  phone        String?
+  isVerified   Boolean    @default(false)
+  role         UserRole   @default(USER)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime
 
-  // Relations (to be expanded)
-  properties    Property[]
-  bookings      Booking[]
+  // Relations
+  properties Property[] @relation("PropertyOwner")
+  bookings   Booking[]  @relation("BookingUser")
+
+  @@map("User")
 }
 
-// Property model
+enum UserRole {
+  USER
+  AGENT
+  LANDLORD
+  ADMIN
+
+  @@map("UserRole")
+}
+
 model Property {
-  id          String    @id @default(uuid())
+  id          String   @id
   title       String
   description String?
   address     String
@@ -39,41 +48,26 @@ model Property {
   bedrooms    Int
   bathrooms   Int
   size        Float?
-  images      String[]
-  amenities   String[]
-  available   Boolean   @default(true)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  available   Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime
+
+  // Geo location
+  latitude  Float?
+  longitude Float?
+
+  // Owner (One-to-Many relation)
+  owner   User   @relation("PropertyOwner", fields: [ownerId], references: [id])
+  ownerId String
+
+  // Arrays
+  images    String[]
+  amenities String[]
 
   // Relations
-  owner       User      @relation(fields: [ownerId], references: [id])
-  ownerId     String
-  bookings    Booking[]
-}
+  bookings Booking[] @relation("PropertyBookings")
 
-// Booking model
-model Booking {
-  id          String        @id @default(uuid())
-  startDate   DateTime
-  endDate     DateTime
-  totalPrice  Float
-  nights      Int           // Number of nights for the booking
-  status      BookingStatus @default(PENDING)
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-
-  // Relations
-  user        User          @relation(fields: [userId], references: [id])
-  userId      String
-  property    Property       @relation(fields: [propertyId], references: [id])
-  propertyId  String
-}
-
-enum UserRole {
-  USER
-  AGENT
-  LANDLORD
-  ADMIN
+  @@map("Property")
 }
 
 enum BookingStatus {
@@ -81,4 +75,27 @@ enum BookingStatus {
   CONFIRMED
   CANCELLED
   COMPLETED
+
+  @@map("BookingStatus")
+}
+
+model Booking {
+  id         String        @id
+  startDate  DateTime
+  endDate    DateTime
+  totalPrice Float
+  nights     Int
+  status     BookingStatus @default(PENDING)
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime
+
+  // User (One-to-Many relation)
+  user   User   @relation("BookingUser", fields: [userId], references: [id])
+  userId String
+
+  // Property (One-to-Many relation)
+  property   Property @relation("PropertyBookings", fields: [propertyId], references: [id])
+  propertyId String
+
+  @@map("Booking")
 }

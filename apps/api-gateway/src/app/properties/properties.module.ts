@@ -1,10 +1,12 @@
 import { Module } from '@nestjs/common';
-import { PropertiesService } from './properties.service';
 import { PropertiesController } from './properties.controller';
+import { PropertiesService } from './properties.service';
 import { PrismaModule } from '../prisma/prisma.module';
+import { SearchModule } from '../elasticsearch/elasticsearch.module';
+import { GeocodingModule } from '../geocoding/geocoding.module';
 
 @Module({
-  imports: [PrismaModule],
+  imports: [PrismaModule, SearchModule, GeocodingModule],
   controllers: [PropertiesController],
   providers: [PropertiesService],
   exports: [PropertiesService],

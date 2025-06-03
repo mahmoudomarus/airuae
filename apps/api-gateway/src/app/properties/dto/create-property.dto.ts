@@ -1,28 +1,39 @@
-import { IsArray, IsNotEmpty, IsNumber, IsOptional, IsString, Min } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsNumber,
+  IsArray,
+  IsBoolean,
+  Min,
+  MaxLength,
+  ArrayMinSize,
+} from 'class-validator';
 
 export class CreatePropertyDto {
   @IsString()
-  @IsNotEmpty()
+  @MaxLength(100)
   title: string;
 
-  @IsString()
   @IsOptional()
+  @IsString()
+  @MaxLength(2000)
   description?: string;
 
   @IsString()
-  @IsNotEmpty()
+  @MaxLength(200)
   address: string;
 
   @IsString()
-  @IsNotEmpty()
+  @MaxLength(100)
   city: string;
 
   @IsString()
-  @IsNotEmpty()
+  @MaxLength(100)
   country: string;
 
-  @IsString()
   @IsOptional()
+  @IsString()
+  @MaxLength(20)
   zipCode?: string;
 
   @IsNumber()
@@ -37,14 +48,31 @@ export class CreatePropertyDto {
   @Min(0)
   bathrooms: number;
 
-  @IsNumber()
   @IsOptional()
+  @IsNumber()
   @Min(0)
   size?: number;
 
+  @IsOptional()
   @IsArray()
-  images: string[];
+  @IsString({ each: true })
+  images?: string[];
 
+  @IsOptional()
   @IsArray()
-  amenities: string[];
+  @IsString({ each: true })
+  amenities?: string[];
+
+  @IsOptional()
+  @IsBoolean()
+  available?: boolean;
+
+  // Geo-location fields
+  @IsOptional()
+  @IsNumber()
+  latitude?: number;
+
+  @IsOptional()
+  @IsNumber()
+  longitude?: number;
 }
