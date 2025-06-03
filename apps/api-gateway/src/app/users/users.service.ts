@@ -1,20 +1,25 @@
-import { Injectable } from '@nestjs/common';
-import { User } from '@prisma/client';
-import * as bcrypt from 'bcrypt';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { UpdateUserDto } from './dto/update-user.dto';
+import * as bcrypt from 'bcryptjs';
+import { User } from '@prisma/client';
 
 @Injectable()
 export class UsersService {
   constructor(private prisma: PrismaService) {}
 
-  async findAll(): Promise<User[]> {
-    return this.prisma.user.findMany();
-  }
-
-  async findOne(id: string): Promise<User | null> {
-    return this.prisma.user.findUnique({
+  async findById(id: string): Promise<User> {
+    const user = await this.prisma.user.findUnique({
       where: { id },
     });
+
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+
+    // Remove password before returning
+    const { password, ...result } = user;
+    return result as User;
   }
 
   async findByEmail(email: string): Promise<User | null> {
@@ -28,49 +33,34 @@ export class UsersService {
     password: string;
     firstName?: string;
     lastName?: string;
+    phone?: string;
+    role?: string;
   }): Promise<User> {
-    const hashedPassword = await this.hashPassword(data.password);
-    return this.prisma.user.create({
+    const hashedPassword = await bcrypt.hash(data.password, 10);
+
+    const user = await this.prisma.user.create({
       data: {
-        email: data.email,
-        passwordHash: hashedPassword,
-        firstName: data.firstName,
-        lastName: data.lastName,
+        ...data,
+        password: hashedPassword,
       },
     });
+
+    // Remove password before returning
+    const { password, ...result } = user;
+    return result as User;
   }
 
-  async update(
-    id: string,
-    data: {
-      firstName?: string;
-      lastName?: string;
-      email?: string;
-      password?: string;
-      profileImage?: string;
-      phone?: string;
-    },
-  ): Promise<User> {
-    const updateData: any = { ...data };
-    if (data.password) {
-      updateData.passwordHash = await this.hashPassword(data.password);
-      delete updateData.password;
-    }
+  async update(id: string, data: UpdateUserDto): Promise<User> {
+    // Check if the user exists
+    await this.findById(id);
 
-    return this.prisma.user.update({
+    const updatedUser = await this.prisma.user.update({
       where: { id },
-      data: updateData,
+      data,
     });
-  }
 
-  async delete(id: string): Promise<User> {
-    return this.prisma.user.delete({
-      where: { id },
-    });
-  }
-
-  private async hashPassword(password: string): Promise<string> {
-    const saltRounds = 10;
-    return bcrypt.hash(password, saltRounds);
+    // Remove password before returning
+    const { password, ...result } = updatedUser;
+    return result as User;
   }
 }
