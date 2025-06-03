@@ -20,7 +20,6 @@ import { CreateCheckoutSessionDto } from './dto/create-checkout-session.dto';
 import { BookingsService } from '../bookings/bookings.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { BookingStatus } from '@prisma/client';
-import { EmailsService } from '../emails/emails.service';
 
 @Controller('payments')
 export class PaymentsController {
@@ -28,7 +27,6 @@ export class PaymentsController {
     private readonly stripeService: StripeService,
     private readonly bookingsService: BookingsService,
     private readonly prisma: PrismaService,
-    private readonly emailsService: EmailsService,
   ) {}
 
   @Post('payment-intent')
@@ -176,29 +174,10 @@ export class PaymentsController {
         
         // Update the booking status to confirmed
         if (bookingId) {
-          const booking = await this.prisma.booking.update({
+          await this.prisma.booking.update({
             where: { id: bookingId },
-            data: { 
-              status: BookingStatus.CONFIRMED,
-              isPaid: true,
-              paymentStatus: 'PAID',
-            },
-            include: { user: true, property: true },
+            data: { status: BookingStatus.CONFIRMED },
           });
-
-          // Send payment confirmation email
-          if (booking) {
-            await this.emailsService.sendPaymentConfirmationEmail(booking);
-            
-            // Also send notification to property owner
-            const host = await this.prisma.user.findUnique({
-              where: { id: booking.property.ownerId },
-            });
-            
-            if (host) {
-              await this.emailsService.sendBookingNotificationToHost(booking, host);
-            }
-          }
         }
       } else if (event && event.type === 'payment_intent.succeeded') {
         const paymentIntent = event.data.object as any;
@@ -206,31 +185,10 @@ export class PaymentsController {
         
         // Update the booking status to confirmed
         if (bookingId) {
-          const booking = await this.prisma.booking.update({
+          await this.prisma.booking.update({
             where: { id: bookingId },
-            data: { 
-              status: BookingStatus.CONFIRMED,
-              isPaid: true,
-              paymentStatus: 'PAID',
-              paymentIntentId: paymentIntent.id,
-              paymentMethod: paymentIntent.payment_method_types?.[0] || 'card',
-            },
-            include: { user: true, property: true },
+            data: { status: BookingStatus.CONFIRMED },
           });
-
-          // Send payment confirmation email
-          if (booking) {
-            await this.emailsService.sendPaymentConfirmationEmail(booking);
-            
-            // Also send notification to property owner
-            const host = await this.prisma.user.findUnique({
-              where: { id: booking.property.ownerId },
-            });
-            
-            if (host) {
-              await this.emailsService.sendBookingNotificationToHost(booking, host);
-            }
-          }
         }
       }
 
@@ -251,7 +209,7 @@ export class PaymentsController {
       // Find the booking
       const booking = await this.prisma.booking.findUnique({
         where: { id: bookingId },
-        include: { property: true, user: true },
+        include: { property: true },
       });
 
       if (!booking) {
@@ -272,35 +230,28 @@ export class PaymentsController {
         throw new BadRequestException('Can only refund confirmed bookings');
       }
 
-      // Retrieve the payment intent ID from the booking
-      if (!booking.paymentIntentId) {
+      // TODO: Retrieve the payment intent ID from the booking
+      // For now, we'll assume it's stored in a payment relation
+      const payment = await this.prisma.booking.findUnique({
+        where: { id: bookingId },
+        select: { paymentIntentId: true },
+      });
+
+      if (!payment || !payment.paymentIntentId) {
         throw new BadRequestException('No payment found for this booking');
       }
 
       // Create the refund
       const refund = await this.stripeService.createRefund(
-        booking.paymentIntentId,
+        payment.paymentIntentId,
         data.amount,
       );
 
       // Update the booking status to cancelled
-      const updatedBooking = await this.prisma.booking.update({
+      await this.prisma.booking.update({
         where: { id: bookingId },
         data: { status: BookingStatus.CANCELLED },
-        include: { user: true, property: true },
       });
-
-      // Send cancellation emails
-      await this.emailsService.sendBookingCancellationToGuest(updatedBooking);
-      
-      // Get the host
-      const host = await this.prisma.user.findUnique({
-        where: { id: booking.property.ownerId },
-      });
-      
-      if (host) {
-        await this.emailsService.sendBookingCancellationToHost(updatedBooking, host);
-      }
 
       return refund;
     } catch (error) {

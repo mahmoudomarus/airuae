@@ -12,6 +12,7 @@ import { UploadsModule } from './uploads/uploads.module';
 import { SearchModule } from './elasticsearch/elasticsearch.module';
 import { GeocodingModule } from './geocoding/geocoding.module';
 import { PaymentsModule } from './payments/payments.module';
+import { EmailsModule } from './emails/emails.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { PaymentsModule } from './payments/payments.module';
     SearchModule,
     GeocodingModule,
     PaymentsModule,
+    EmailsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -1,0 +1,54 @@
+{{#> layout title="Payment Confirmation"}}
+  <h1>Payment Successful!</h1>
+  <p>Hello {{user.firstName}},</p>
+  <p>Your payment for the following booking has been successfully processed:</p>
+  
+  <div class="property-card">
+    {{#if property.images.length}}
+      <img src="{{property.images.[0]}}" alt="{{property.title}}" class="property-image">
+    {{/if}}
+    <h2>{{property.title}}</h2>
+    <p>{{property.address}}, {{property.city}}, {{property.country}}</p>
+  </div>
+  
+  <div class="booking-details">
+    <div class="detail-row">
+      <span>Check-in:</span>
+      <span>{{booking.startDate}}</span>
+    </div>
+    <div class="detail-row">
+      <span>Check-out:</span>
+      <span>{{booking.endDate}}</span>
+    </div>
+    <div class="detail-row">
+      <span>Duration:</span>
+      <span>{{booking.nights}} {{#if (eq booking.nights 1)}}night{{else}}nights{{/if}}</span>
+    </div>
+    <div class="detail-row">
+      <span>Total Amount Paid:</span>
+      <span>${{booking.formattedPrice}}</span>
+    </div>
+    <div class="detail-row">
+      <span>Payment Status:</span>
+      <span>Completed</span>
+    </div>
+  </div>
+  
+  <p>A receipt has been generated and can be viewed in your account. You can also view all the details of your booking and manage it through your account.</p>
+  
+  <p style="text-align: center; margin: 30px 0;">
+    <a href="{{bookingUrl}}" class="button">View Booking Details</a>
+  </p>
+  
+  <h3>Important Information</h3>
+  <ul>
+    <li><strong>Check-in time:</strong> After 3:00 PM</li>
+    <li><strong>Check-out time:</strong> Before 11:00 AM</li>
+    <li><strong>Contact the host:</strong> You can message the host through our platform if you have any questions.</li>
+    <li><strong>Cancellation policy:</strong> Free cancellation up to 48 hours before check-in. After that, the first night is non-refundable.</li>
+  </ul>
+  
+  <p>We hope you enjoy your stay!</p>
+  
+  <p>Best regards,<br>The AirUAE Team</p>
+{{/layout}}
