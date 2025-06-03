@@ -4,7 +4,10 @@
   "description": "Airbnb-style rental platform with dual short-term and long-term rental models for UAE",
   "private": true,
   "scripts": {
-    "start": "echo \"No start script defined yet\"",
+    "start": "nx run-many --target=serve --all",
+    "dev": "nx run-many --target=serve --all",
+    "start:api": "nx serve api-gateway",
+    "start:web": "nx serve web",
     "docker:up": "docker-compose up -d",
     "docker:down": "docker-compose down",
     "db:seed": "ts-node prisma/seed.ts"
