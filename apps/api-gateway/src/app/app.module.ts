@@ -11,6 +11,7 @@ import { BookingsModule } from './bookings/bookings.module';
 import { UploadsModule } from './uploads/uploads.module';
 import { SearchModule } from './elasticsearch/elasticsearch.module';
 import { GeocodingModule } from './geocoding/geocoding.module';
+import { PaymentsModule } from './payments/payments.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { GeocodingModule } from './geocoding/geocoding.module';
     UploadsModule,
     SearchModule,
     GeocodingModule,
+    PaymentsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
