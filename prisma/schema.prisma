@@ -57,6 +57,7 @@ model Booking {
   startDate   DateTime
   endDate     DateTime
   totalPrice  Float
+  nights      Int           // Number of nights for the booking
   status      BookingStatus @default(PENDING)
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
