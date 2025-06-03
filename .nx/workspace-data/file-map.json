@@ -1,0 +1,63 @@
+{
+  "version": "6.0",
+  "nxVersion": "21.1.2",
+  "pathMappings": {},
+  "nxJsonPlugins": [],
+  "fileMap": {
+    "nonProjectFiles": [
+      {
+        "file": ".env.example",
+        "hash": "7024916014786688890"
+      },
+      {
+        "file": ".gitignore",
+        "hash": "10479467038549406173"
+      },
+      {
+        "file": "README.md",
+        "hash": "16330516674101411986"
+      },
+      {
+        "file": "docker-compose.yml",
+        "hash": "13000718991234960275"
+      },
+      {
+        "file": "docker/localstack/init-aws.sh",
+        "hash": "3244421341483603138"
+      },
+      {
+        "file": "docker/postgres/init.sql",
+        "hash": "3244421341483603138"
+      },
+      {
+        "file": "documentation/architecture-diagram.md",
+        "hash": "7159944408783182064"
+      },
+      {
+        "file": "documentation/comprehensive-specification.md",
+        "hash": "3244421341483603138"
+      },
+      {
+        "file": "documentation/implementation-guide.md",
+        "hash": "18105725000290675159"
+      },
+      {
+        "file": "nx.json",
+        "hash": "11170740888755095213"
+      },
+      {
+        "file": "package.json",
+        "hash": "11135738694652630371"
+      },
+      {
+        "file": "prisma/schema.prisma",
+        "hash": "9972089537150041059"
+      },
+      {
+        "file": "yarn.lock",
+        "hash": "299780517215477508"
+      }
+    ],
+    "projectFileMap": {}
+  }
+}
