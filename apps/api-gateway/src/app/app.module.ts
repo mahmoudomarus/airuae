@@ -13,6 +13,7 @@ import { SearchModule } from './elasticsearch/elasticsearch.module';
 import { GeocodingModule } from './geocoding/geocoding.module';
 import { PaymentsModule } from './payments/payments.module';
 import { EmailsModule } from './emails/emails.module';
+import { MessagingModule } from './messaging/messaging.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { EmailsModule } from './emails/emails.module';
     GeocodingModule,
     PaymentsModule,
     EmailsModule,
+    MessagingModule,
   ],
   controllers: [AppController],
   providers: [AppService],

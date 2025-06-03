@@ -24,8 +24,13 @@ model User {
   stripeCustomerId String?
 
   // Relations
-  properties Property[] @relation("PropertyOwner")
-  bookings   Booking[]  @relation("BookingUser")
+  properties     Property[]      @relation("PropertyOwner")
+  bookings       Booking[]       @relation("BookingUser")
+  sentMessages   Message[]       @relation("MessageSender")
+  conversations  Conversation[]  @relation("ConversationParticipants")
+  agencyMembers  User[]          @relation("AgencyMembers")
+  agency         User?           @relation("AgencyMembers", fields: [agencyId], references: [id])
+  agencyId       String?
 
   @@map("User")
 }
@@ -68,7 +73,8 @@ model Property {
   amenities String[]
 
   // Relations
-  bookings Booking[] @relation("PropertyBookings")
+  bookings      Booking[]      @relation("PropertyBookings")
+  conversations Conversation[] @relation("PropertyConversations")
 
   @@map("Property")
 }
@@ -106,5 +112,48 @@ model Booking {
   property   Property @relation("PropertyBookings", fields: [propertyId], references: [id])
   propertyId String
 
+  // Related conversation
+  conversation   Conversation? @relation("BookingConversation")
+
   @@map("Booking")
+}
+
+model Conversation {
+  id        String   @id
+  title     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime
+
+  // Participants (Many-to-Many relation)
+  participants User[] @relation("ConversationParticipants")
+
+  // Related property (if any)
+  property   Property? @relation("PropertyConversations", fields: [propertyId], references: [id])
+  propertyId String?
+
+  // Related booking (if any)
+  booking   Booking? @relation("BookingConversation", fields: [bookingId], references: [id])
+  bookingId String?  @unique
+
+  // Messages in this conversation
+  messages Message[] @relation("ConversationMessages")
+
+  @@map("Conversation")
+}
+
+model Message {
+  id        String   @id
+  content   String
+  createdAt DateTime @default(now())
+  readAt    DateTime?
+  
+  // Sender (One-to-Many relation)
+  sender   User   @relation("MessageSender", fields: [senderId], references: [id])
+  senderId String
+
+  // Conversation (One-to-Many relation)
+  conversation   Conversation @relation("ConversationMessages", fields: [conversationId], references: [id])
+  conversationId String
+
+  @@map("Message")
 }
