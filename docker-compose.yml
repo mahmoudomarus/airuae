@@ -1,37 +1,43 @@
+version: '3.8'
+
 services:
-  # PostgreSQL Database
   postgres:
-    image: postgres:15-alpine
     container_name: airuae-postgres
+    image: postgres:15-alpine
     ports:
-      - 5432:5432
+      - "5432:5432"
     environment:
-      POSTGRES_USER: airuae
-      POSTGRES_PASSWORD: password
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
       POSTGRES_DB: airuae
     volumes:
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
       - postgres_data:/var/lib/postgresql/data
-    networks:
-      - airuae-network
-    restart: unless-stopped
 
-  # Redis Cache
   redis:
-    image: redis:7-alpine
     container_name: airuae-redis
+    image: redis:7-alpine
     ports:
-      - 6379:6379
-    command: redis-server --appendonly yes
+      - "6379:6379"
     volumes:
       - redis_data:/data
-    networks:
-      - airuae-network
-    restart: unless-stopped
 
-networks:
-  airuae-network:
-    driver: bridge
+  localstack:
+    container_name: airuae-localstack
+    image: localstack/localstack:latest
+    ports:
+      - "4566:4566"
+    environment:
+      - SERVICES=s3
+      - DEFAULT_REGION=us-east-1
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - DEBUG=1
+    volumes:
+      - ./docker/localstack:/docker-entrypoint-initaws.d
+      - localstack_data:/var/lib/localstack
 
 volumes:
   postgres_data:
   redis_data:
+  localstack_data:

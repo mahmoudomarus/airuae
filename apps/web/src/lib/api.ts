@@ -1,85 +1,148 @@
 /**
- * API client utility for making HTTP requests to the backend
+ * API utility for making requests to the backend
  */
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
+// Get API base URL from environment or use a default
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333/api';
 
-type RequestOptions = {
-  method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
-  headers?: Record<string, string>;
-  body?: any;
-  withAuth?: boolean;
+// Helper to handle JSON responses
+const handleResponse = async (response: Response) => {
+  const contentType = response.headers.get('content-type');
+  
+  if (contentType && contentType.includes('application/json')) {
+    const data = await response.json();
+    
+    if (!response.ok) {
+      // If response contains error message, use it; otherwise use status text
+      const errorMessage = data.message || data.error || response.statusText;
+      throw new Error(errorMessage);
+    }
+    
+    return data;
+  }
+  
+  // For non-JSON responses
+  if (!response.ok) {
+    throw new Error(response.statusText);
+  }
+  
+  return await response.text();
 };
 
-/**
- * Generic API request function
- */
-export async function apiRequest<T>(
-  endpoint: string,
-  options: RequestOptions = {}
-): Promise<T> {
-  const {
-    method = 'GET',
-    headers = {},
-    body,
-    withAuth = true,
-  } = options;
-
-  const requestHeaders: Record<string, string> = {
-    'Content-Type': 'application/json',
-    ...headers,
-  };
-
-  // Add auth token if required and available
-  if (withAuth) {
-    const token = localStorage.getItem('auth_token');
-    if (token) {
-      requestHeaders['Authorization'] = `Bearer ${token}`;
-    }
+// Get auth token from local storage
+const getToken = () => {
+  if (typeof window === 'undefined') {
+    return null;
   }
+  
+  return localStorage.getItem('authToken');
+};
 
-  const config: RequestInit = {
-    method,
-    headers: requestHeaders,
-  };
-
-  if (body) {
-    config.body = JSON.stringify(body);
-  }
-
-  const response = await fetch(`${API_URL}${endpoint}`, config);
-
-  // Handle HTTP errors
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(
-      errorData.message || `API request failed with status ${response.status}`
-    );
-  }
-
-  // Parse JSON response
-  return response.json();
-}
-
-/**
- * Convenience methods for common HTTP verbs
- */
+// API methods
 export const api = {
-  get: <T>(endpoint: string, options?: Omit<RequestOptions, 'method' | 'body'>) =>
-    apiRequest<T>(endpoint, { ...options, method: 'GET' }),
-
-  post: <T>(
-    endpoint: string,
-    body: any,
-    options?: Omit<RequestOptions, 'method'>
-  ) => apiRequest<T>(endpoint, { ...options, method: 'POST', body }),
-
-  put: <T>(
-    endpoint: string,
-    body: any,
-    options?: Omit<RequestOptions, 'method'>
-  ) => apiRequest<T>(endpoint, { ...options, method: 'PUT', body }),
-
-  delete: <T>(endpoint: string, options?: Omit<RequestOptions, 'method'>) =>
-    apiRequest<T>(endpoint, { ...options, method: 'DELETE' }),
+  /**
+   * Make a GET request
+   */
+  get: async <T>(path: string): Promise<T> => {
+    const token = getToken();
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+    };
+    
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    
+    const response = await fetch(`${API_BASE_URL}${path}`, {
+      method: 'GET',
+      headers,
+    });
+    
+    return handleResponse(response);
+  },
+  
+  /**
+   * Make a POST request with JSON body
+   */
+  post: async <T>(path: string, data: any = {}): Promise<T> => {
+    const token = getToken();
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+    };
+    
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    
+    const response = await fetch(`${API_BASE_URL}${path}`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(data),
+    });
+    
+    return handleResponse(response);
+  },
+  
+  /**
+   * Make a PUT request with JSON body
+   */
+  put: async <T>(path: string, data: any = {}): Promise<T> => {
+    const token = getToken();
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+    };
+    
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    
+    const response = await fetch(`${API_BASE_URL}${path}`, {
+      method: 'PUT',
+      headers,
+      body: JSON.stringify(data),
+    });
+    
+    return handleResponse(response);
+  },
+  
+  /**
+   * Make a DELETE request
+   */
+  delete: async <T>(path: string): Promise<T> => {
+    const token = getToken();
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+    };
+    
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    
+    const response = await fetch(`${API_BASE_URL}${path}`, {
+      method: 'DELETE',
+      headers,
+    });
+    
+    return handleResponse(response);
+  },
+  
+  /**
+   * Upload a file
+   */
+  uploadFile: async <T>(path: string, formData: FormData): Promise<T> => {
+    const token = getToken();
+    const headers: HeadersInit = {};
+    
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    
+    const response = await fetch(`${API_BASE_URL}${path}`, {
+      method: 'POST',
+      headers,
+      body: formData,
+    });
+    
+    return handleResponse(response);
+  },
 };

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuthContext } from '../../../context/AuthContext';
 import { api } from '../../../lib/api';
+import ImageUploader from '../../../components/ImageUploader';
 
 interface FormData {
   title: string;
@@ -26,6 +27,7 @@ export default function CreatePropertyPage() {
   const { isAuthenticated, user } = useAuthContext();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const [imageUrl, setImageUrl] = useState('');
   const [amenity, setAmenity] = useState('');
   
@@ -82,14 +84,12 @@ export default function CreatePropertyPage() {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const addImage = () => {
-    if (imageUrl.trim()) {
-      setFormData(prev => ({
-        ...prev,
-        images: [...prev.images, imageUrl.trim()],
-      }));
-      setImageUrl('');
-    }
+  const handleImageUploaded = (uploadedImageUrl: string) => {
+    setFormData(prev => ({
+      ...prev,
+      images: [...prev.images, uploadedImageUrl],
+    }));
+    setUploadError(null);
   };
 
   const removeImage = (index: number) => {
@@ -343,22 +343,20 @@ export default function CreatePropertyPage() {
             {/* Images */}
             <div className="md:col-span-2">
               <h2 className="text-lg font-semibold mb-4">Images</h2>
-              <div className="flex mb-4">
-                <input
-                  type="text"
-                  value={imageUrl}
-                  onChange={(e) => setImageUrl(e.target.value)}
-                  className="flex-grow px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                  placeholder="Enter image URL"
+              
+              {uploadError && (
+                <div className="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                  <span className="block sm:inline">{uploadError}</span>
+                </div>
+              )}
+              
+              <div className="mb-4">
+                <ImageUploader 
+                  onImageUploaded={handleImageUploaded} 
+                  onError={setUploadError}
                 />
-                <button
-                  type="button"
-                  onClick={addImage}
-                  className="bg-indigo-600 text-white px-4 py-2 rounded-r-md hover:bg-indigo-700"
-                >
-                  Add
-                </button>
               </div>
+              
               {formData.images.length > 0 && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-4">
                   {formData.images.map((image, index) => (
