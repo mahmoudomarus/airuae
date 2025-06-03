@@ -1,0 +1,11 @@
+{
+  "name": "airuae",
+  "version": "0.1.0",
+  "description": "Airbnb-style rental platform with dual short-term and long-term rental models for UAE",
+  "private": true,
+  "scripts": {
+    "start": "echo \"No start script defined yet\"",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down"
+  }
+}
