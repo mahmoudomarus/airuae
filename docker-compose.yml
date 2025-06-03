@@ -1,12 +1,10 @@
-version: \"3.8\"
-
 services:
   # PostgreSQL Database
   postgres:
     image: postgres:15-alpine
     container_name: airuae-postgres
     ports:
-      - \"5432:5432\"
+      - 5432:5432
     environment:
       POSTGRES_USER: airuae
       POSTGRES_PASSWORD: password
@@ -22,7 +20,7 @@ services:
     image: redis:7-alpine
     container_name: airuae-redis
     ports:
-      - \"6379:6379\"
+      - 6379:6379
     command: redis-server --appendonly yes
     volumes:
       - redis_data:/data
